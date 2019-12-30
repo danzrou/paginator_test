@@ -1,0 +1,8 @@
+<button (click)="nextPage()">Next</button>
+<button (click)="prevPage()">Prev</button>
+<input [formControl]="searchTerm">
+
+<div *ngIf="isLoading$ | async; else data">Loading...</div>
+<ng-template #data>
+    <pre>{{data$ | async | json}}</pre>
+</ng-template>
