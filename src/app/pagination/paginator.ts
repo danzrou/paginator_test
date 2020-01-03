@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, finalize, map, startWith } from 'rxjs/operators';
 import { User } from '../user';
 import { PagingRequest } from './pagination-service';
 
@@ -28,10 +28,6 @@ export class Paginator<T = any> {
 
 	protected _getDataRequest: (request: PagingRequest) => Observable<T[]>;
 	protected _dataSource: Observable<T[]>;
-
-	get dataSource() {
-		return this._dataSource || new BehaviorSubject([]).asObservable().pipe(startWith([]));
-	}
 
 	get isLoading() {
 		return this.isLoading$.asObservable();
@@ -139,10 +135,10 @@ export class Paginator<T = any> {
 	}
 
 	getDataSource() {
-		if(!this._dataSource) {
-			throw new Error('Data source is not defined')
+		if (!this._dataSource) {
+			throw new Error('Data source is not defined');
 		}
-		return this.dataSource;
+		return this._dataSource;
 	}
 
 	private setPagination(config: Partial<PaginationResponse<User>>) {
@@ -156,11 +152,14 @@ export class Paginator<T = any> {
 		if (!this._getDataRequest) {
 			throw new Error('Data request is not defined');
 		}
+		this.setLoading(true);
 		this._getDataRequest({
 			pageSize: this.pagination.pageSize,
 			requestedPage: this.currentPage,
 			searchTerm: this.pagination.searchTerm
-		}).subscribe();
+		})
+			.pipe(finalize(() => this.setLoading(false)))
+			.subscribe();
 	}
 }
 
