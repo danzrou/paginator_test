@@ -15,7 +15,7 @@ export class DummyServer {
       },
       objectsList: us
     }).pipe(
-      delay(3000)
+      delay(1000)
     );
   }
 
