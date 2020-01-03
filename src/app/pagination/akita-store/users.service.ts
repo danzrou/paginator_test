@@ -3,12 +3,9 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DummyServer } from '../../server/dummy-server';
 import { User } from '../../user';
-import {
-	PaginationService,
-	PagingRequest,
-	pagingToPaginationResponse
-} from '../pagination-service';
-import { PaginationResponse } from '../paginator';
+import { PaginationResponse, PaginationService } from '../models/pagination';
+import { PagingRequest } from '../models/paging';
+import { pagingToPaginationResponse } from '../pagionation.helpers';
 import { UsersStore } from './users.store';
 
 @Injectable({ providedIn: 'root' })

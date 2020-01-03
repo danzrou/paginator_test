@@ -1,10 +1,10 @@
 import { Component, Inject } from '@angular/core';
-import { DataSource } from './pagination/data-source';
+import { UsersQuery } from './pagination/akita-store/users.query';
+import { UsersService } from './pagination/akita-store/users.service';
 import { PAGINATOR } from './pagination/injection-tokens';
-import { UserService } from './pagination/pagination-service';
 import { Paginator } from './pagination/paginator';
-import { UsersQuery } from './pagination/state/users.query';
-import { UsersService } from './pagination/state/users.service';
+import { DataSource } from './pagination/paging-store/data-source';
+import { UserService } from './pagination/paging-store/users-service';
 
 @Component({
 	selector: 'app-root',
@@ -27,12 +27,22 @@ export class AppComponent {
 	}
 
 	private setStubSource() {
-		this.paginator.setDataSource(this.dataSource.getData());
-		this.paginator.setDataRequest(this.userService.getPage.bind(this.userService));
+		this.paginator
+			.setDataSource(this.dataSource.getData())
+			.setDataRequest(this.userService.getPage.bind(this.userService));
 	}
 
 	private setAkitaSource() {
-		this.paginator.setDataSource(this.usersQuery.getData());
-		this.paginator.setDataRequest(this.usersService.getPage.bind(this.usersService));
+		this.paginator
+			.setDataSource(this.usersQuery.getData())
+			.setDataRequest(this.usersService.getPage.bind(this.usersService));
+	}
+
+	refresh() {
+		this.paginator.refreshCurrentPage();
+	}
+
+	search(query: string) {
+		this.paginator.search(query);
 	}
 }

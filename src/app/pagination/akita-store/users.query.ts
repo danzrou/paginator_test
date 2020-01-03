@@ -3,7 +3,7 @@ import { QueryEntity } from '@datorama/akita';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from '../../user';
-import { PaginationDataSource } from '../data-source';
+import { PaginationDataSource } from '../models/pagination';
 import { UsersState, UsersStore } from './users.store';
 
 @Injectable({ providedIn: 'root' })

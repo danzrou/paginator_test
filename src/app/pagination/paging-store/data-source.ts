@@ -1,15 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { User } from '../user';
-
-export interface PaginationDataSource<T> {
-	getData(): Observable<T[]>;
-}
+import { User } from '../../user';
+import { PaginationDataSource } from '../models/pagination';
 
 @Injectable({
 	providedIn: 'root'
 })
-export class DataSource implements PaginationDataSource<any> {
+export class DataSource implements PaginationDataSource {
 	data$ = new BehaviorSubject(null);
 
 	getData(): Observable<any[]> {

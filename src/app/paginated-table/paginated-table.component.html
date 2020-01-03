@@ -1,9 +1,37 @@
-<button (click)="nextPage()">Next</button>
-<button (click)="prevPage()">Prev</button>
-<button (click)="refresh()">Refresh</button>
+<div class="btn-group">
+    <button (click)="firstPage()">First</button>
+    <button (click)="prevPage()">Prev</button>
+    <button (click)="nextPage()">Next</button>
+    <button (click)="lastPage()">Last</button>
+    <button (click)="refresh()">Refresh</button>
+</div>
 <input [formControl]="searchTerm">
+
+<hr>
+<h4>Props</h4>
+<div class="props">
+    <div>isFirst
+        <pre>{{isFirst$ | async | json}}</pre>
+    </div>
+    <div>isLast
+        <pre>{{isLast$ | async | json}}</pre>
+    </div>
+    <div>Current page
+        <pre>{{currentPage$ | async | json}}</pre>
+    </div>
+    <div>Search
+        <pre>{{search$ | async | json}}</pre>
+    </div>
+    <div>From
+        <pre>{{from$ | async | json}}</pre>
+    </div>
+    <div>To
+        <pre>{{to$ | async | json}}</pre>
+    </div>
+</div>
 
 <div *ngIf="isLoading$ | async; else data">Loading...</div>
 <ng-template #data>
-    <pre>{{data$ | async | json}}</pre>
+    <pre>{{pagination$ | async | json}}</pre>
 </ng-template>
+

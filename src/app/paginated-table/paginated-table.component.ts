@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, map } from 'rxjs/operators';
 import { PAGINATOR } from '../pagination/injection-tokens';
 import { Paginator } from '../pagination/paginator';
 
@@ -11,14 +11,22 @@ import { Paginator } from '../pagination/paginator';
 })
 export class PaginatedTableComponent implements OnInit {
 	searchTerm = new FormControl('');
-	data$ = this.paginator.getDataSource();
+	data$ = this.paginator.pagination$.pipe(map(p => p.data));
 	isLoading$ = this.paginator.isLoading;
+	pagination$ = this.paginator.pagination$;
+
+	isFirst$ = this.paginator.isFirst$;
+	isLast$ = this.paginator.isLast$;
+	currentPage$ = this.paginator.pageChanges;
+	search$ = this.paginator.searchChanges;
+	from$ = this.paginator.from;
+	to$ = this.paginator.to;
 
 	constructor(@Inject(PAGINATOR) private paginator: Paginator) {}
 
 	ngOnInit() {
 		this.subToSearch();
-		this.refresh();
+		this.paginator.firstPage();
 	}
 
 	nextPage() {
@@ -39,5 +47,13 @@ export class PaginatedTableComponent implements OnInit {
 
 	private subToSearch() {
 		this.searchTerm.valueChanges.pipe(debounceTime(300)).subscribe(s => this.search(s));
+	}
+
+	firstPage() {
+		this.paginator.firstPage();
+	}
+
+	lastPage() {
+		this.paginator.lastPage();
 	}
 }
