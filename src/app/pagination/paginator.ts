@@ -150,7 +150,7 @@ export class Paginator<T = any> {
 
 	private getData() {
 		if (!this._getDataRequest) {
-			throw new Error('Data request is not defined');
+			throw new Error('Data re`quest is not defined');
 		}
 		this.setLoading(true);
 		this._getDataRequest({

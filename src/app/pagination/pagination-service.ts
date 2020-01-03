@@ -22,11 +22,11 @@ export interface PagingResponse<T> {
 	metadata: PagingMetadata;
 }
 
-export interface PagingService<T> {
+export interface PaginationService<T> {
 	getPage(request: PagingRequest): Observable<PaginationResponse<T>>;
 }
 
-function pagingToPaginationResponse<T>(
+export function pagingToPaginationResponse<T>(
 	request: PagingRequest
 ): OperatorFunction<PagingResponse<T>, PaginationResponse<T>> {
 	return (source: Observable<PagingResponse<T>>): Observable<PaginationResponse<T>> => {
@@ -46,14 +46,16 @@ function pagingToPaginationResponse<T>(
 @Injectable({
 	providedIn: 'root'
 })
-export class UserService implements PagingService<User> {
+export class UserService implements PaginationService<User> {
 	private server = new DummyServer();
 
-	constructor(private ds: DataSource) {
-	}
+	constructor(private ds: DataSource) {}
 
 	getPage(request: PagingRequest): Observable<PaginationResponse<User>> {
 		console.log('getData called');
-		return this.server.getUsers(request).pipe(pagingToPaginationResponse(request), tap(data => this.ds.setData(data.data)));
+		return this.server.getUsers(request).pipe(
+			pagingToPaginationResponse(request),
+			tap(data => this.ds.setData(data.data))
+		);
 	}
 }
