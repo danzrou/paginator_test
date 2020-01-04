@@ -6,8 +6,6 @@
     <button (click)="refresh()">Refresh</button>
 </div>
 <input [formControl]="searchTerm">
-
-<hr>
 <table>
     <thead>
     <tr>
@@ -31,25 +29,14 @@
     </tbody>
 </table>
 
+<hr>
+
 <div *ngIf="isLoading$ | async; else data">Loading...</div>
 <ng-template #data>
-    <table *ngIf="(dataSource$ | async) as users" class="users">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>First name</th>
-            <th>Last name</th>
-            <th>Age</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let user of users">
-            <td>{{user.id}}</td>
-            <td>{{user.firstName}}</td>
-            <td>{{user.lastName}}</td>
-            <td>{{user.age}}</td>
-        </tr>
-        </tbody>
-    </table>
+    <div style="display: flex; justify-content: space-evenly">
+        <app-user-table [users]="data$ | async" title="Page data"></app-user-table>
+        <app-user-table [users]="dataSource$ | async" title="All data"></app-user-table>
+    </div>
+
 </ng-template>
 

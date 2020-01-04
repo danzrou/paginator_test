@@ -1,0 +1,17 @@
+table {
+	border: 1px solid #ccc;
+	margin-bottom: 1rem;
+
+	&.users {
+		th,
+		td {
+			padding: 15px;
+		}
+	}
+
+	th,
+	td {
+		border: 1px solid #ccc;
+	}
+}
+

@@ -157,10 +157,10 @@ export class Paginator<T = any> {
 		return this;
 	}
 
-	getPage(request: Observable<PaginationResponse<T>>) {
+	getPage(request: Observable<PaginationResponse<T>>): Observable<PaginationResponse<T>> {
 		this.cancelRequest$.next();
 		this.setLoading(true);
-		let obs: Observable<any>;
+		let obs: Observable<PaginationResponse<T>>;
 		if (this.isCurrentPageInCache()) {
 			obs = this.getCurrentPageFromCache();
 		} else {
@@ -217,11 +217,14 @@ export class Paginator<T = any> {
 		this.initTTL(data);
 	}
 
-	protected getCurrentPageFromCache() {
+	protected getCurrentPageFromCache(): Observable<PaginationResponse<T>> {
 		return this.config.dataSource.getData().pipe(
 			take(1),
-			map(data => this.filterPage(data)),
-			tap(data => this.setPagination({ data }))
+			map(data => ({
+				...this.pagination,
+				data: this.filterPage(data)
+			})),
+			tap(({ data }) => this.setPagination({ data }))
 		);
 	}
 

@@ -1,0 +1,19 @@
+<h3 style="text-decoration: underline">{{title}}</h3>
+<table *ngIf="users" class="users">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>First name</th>
+        <th>Last name</th>
+        <th>Age</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let user of users">
+        <td>{{user.id}}</td>
+        <td>{{user.firstName}}</td>
+        <td>{{user.lastName}}</td>
+        <td>{{user.age}}</td>
+    </tr>
+    </tbody>
+</table>
