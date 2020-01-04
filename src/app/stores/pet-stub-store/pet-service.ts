@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { PaginationResponse } from '../../pagination/models/pagination';
 import { PagingRequest } from '../../pagination/models/paging';
-import { pagingToPaginationResponse } from '../../pagination/pagionation.helpers';
+import { pagingToPaginationResponse } from '../../pagination/pagination.helpers';
 import { Pet } from './pet';
 import { DummyServer } from '../../server/dummy-server';
 import { PET_MOCK } from '../../server/pet-data';
