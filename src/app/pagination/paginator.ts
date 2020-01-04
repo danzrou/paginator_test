@@ -20,7 +20,7 @@ export class Paginator<T = any> {
 
 	protected config: PaginatorConfig;
 	protected pages = new Map<number, (string | number)[]>([]);
-	private cancelRequest$ = new Subject();
+	protected cancelRequest$ = new Subject();
 
 	constructor(@Optional() @Inject(PAGINATOR_CONFIG) config: Partial<PaginatorConfig> = {}) {
 		this.config = new PaginatorConfig(config);
@@ -50,6 +50,10 @@ export class Paginator<T = any> {
 		return this.currentPage === 0;
 	}
 
+	get isLast() {
+		return this.currentPage === this.pagination.totalPages - 1;
+	}
+
 	get isFirst$() {
 		return this.pagination$.pipe(map(pagination => pagination.currentPage === 0));
 	}
@@ -60,22 +64,18 @@ export class Paginator<T = any> {
 		);
 	}
 
-	get from() {
+	get from$() {
 		return this.pagination$.pipe(
 			map(() => (this.isFirst ? 1 : this.currentPage * this.pageSize + 1))
 		);
 	}
 
-	get to() {
+	get to$() {
 		return this.pagination$.pipe(
 			map(() =>
 				this.isLast ? this.pagination.totalRecords : (this.currentPage + 1) * this.pageSize
 			)
 		);
-	}
-
-	get isLast() {
-		return this.currentPage === this.pagination.totalPages - 1;
 	}
 
 	get pageChanges() {
@@ -90,6 +90,10 @@ export class Paginator<T = any> {
 			map(({ searchTerm }) => searchTerm),
 			distinctUntilChanged()
 		);
+	}
+
+	get data$() {
+		return this.pagination$.pipe(map(pagination => pagination.data));
 	}
 
 	firstPage(): void {
@@ -120,17 +124,16 @@ export class Paginator<T = any> {
 
 	search(searchTerm: string): void {
 		this.setPagination({ searchTerm, currentPage: 0 });
-		this.fetchPage();
+		this.fetchPageIfNeeded();
 	}
 
 	setPage(page: number): void {
 		this.setPagination({ currentPage: page });
-		this.fetchPage();
+		this.fetchPageIfNeeded();
 	}
 
 	setPageSize(pageSize: number): void {
 		this.setPagination({ pageSize });
-		this.fetchPage();
 	}
 
 	hasNext(): boolean {
@@ -170,6 +173,22 @@ export class Paginator<T = any> {
 		return this;
 	}
 
+	getPage(request: Observable<PaginationResponse<T>>) {
+		this.cancelRequest$.next();
+		this.setLoading(true);
+		let obs: Observable<any>;
+		if (this.isCurrentPageInCache()) {
+			obs = this.getCurrentPageFromCache();
+		} else {
+			obs = request.pipe(tap(data => this.onPaginationResponse(data)));
+		}
+
+		return obs.pipe(
+			takeUntil(this.cancelRequest$),
+			finalize(() => this.setLoading(false))
+		);
+	}
+
 	protected setPagination(config: Partial<PaginationResponse<T>>) {
 		this._pagination$.next({
 			...this.pagination,
@@ -177,54 +196,31 @@ export class Paginator<T = any> {
 		});
 	}
 
-	protected fetchPage() {
+	protected fetchPageIfNeeded() {
 		if (this.config.makeRequests) {
-			this.cancelRequest$.next();
 			if (!this.config.getPageRequest) {
 				throw new Error('Data request is not defined');
 			}
-
-			this.setLoading(true);
-			let obs: Observable<any>;
-			if (this.isCurrentPageInCache()) {
-				obs = this.getPageFromCache();
-			} else {
-				obs = this.fetchPageRequest();
-			}
-
-			obs
-				.pipe(
-					takeUntil(this.cancelRequest$),
-					finalize(() => this.setLoading(false))
-				)
-				.subscribe();
+			this.getPage(
+				this.config.getPageRequest({
+					searchTerm: this.pagination.searchTerm,
+					requestedPage: this.pagination.currentPage,
+					pageSize: this.pagination.pageSize
+				})
+			).subscribe();
 		}
 	}
 
 	protected updatePage(data: T[]) {
 		this.pages.set(
 			this.currentPage,
-			data.map(d => d[this.config.idKey])
+			data.map(item => item[this.config.idKey])
 		);
 	}
 
 	protected filterPage(data: T[]) {
 		const currentPage = this.pages.get(this.currentPage);
 		return data.filter(item => currentPage.includes(item[this.config.idKey]));
-	}
-
-	protected fetchPageRequest() {
-		return this.config
-			.getPageRequest({
-				pageSize: this.pagination.pageSize,
-				requestedPage: this.currentPage,
-				searchTerm: this.pagination.searchTerm
-			})
-			.pipe(
-				tap(data => {
-					this.onPaginationResponse(data);
-				})
-			);
 	}
 
 	protected isCurrentPageInCache() {
@@ -237,7 +233,7 @@ export class Paginator<T = any> {
 		this.initTTL(data);
 	}
 
-	protected getPageFromCache() {
+	protected getCurrentPageFromCache() {
 		return this.config.dataSource.pipe(
 			take(1),
 			map(data => this.filterPage(data)),

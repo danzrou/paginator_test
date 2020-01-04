@@ -11,7 +11,7 @@ import { pagingToPaginationResponse } from '../pagionation.helpers';
 @Injectable({
 	providedIn: 'root'
 })
-export class UserService implements PaginationService<User> {
+export class UserServiceStub implements PaginationService<User> {
 	private server = new DummyServer();
 
 	constructor(private ds: DataSource) {}

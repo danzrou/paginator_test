@@ -11,7 +11,7 @@ import { Paginator } from '../pagination/paginator';
 })
 export class PaginatedTableComponent implements OnInit {
 	searchTerm = new FormControl('');
-	data$ = this.paginator.pagination$.pipe(map(p => p.data));
+	data$ = this.paginator.data$;
 	isLoading$ = this.paginator.isLoading;
 	pagination$ = this.paginator.pagination$;
 
@@ -19,8 +19,8 @@ export class PaginatedTableComponent implements OnInit {
 	isLast$ = this.paginator.isLast$;
 	currentPage$ = this.paginator.pageChanges;
 	search$ = this.paginator.searchChanges;
-	from$ = this.paginator.from;
-	to$ = this.paginator.to;
+	from$ = this.paginator.from$;
+	to$ = this.paginator.to$;
 
 	constructor(@Inject(PAGINATOR) private paginator: Paginator) {}
 
