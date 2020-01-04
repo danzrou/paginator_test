@@ -6,10 +6,12 @@ export interface PaginationResponse<T = any> {
 	pageSize: number;
 	totalPages: number;
 	totalRecords: number;
-	rangeFrom?: number;
-	rangeTo?: number;
 	data: T[];
 	searchTerm: string;
+	rangeFrom?: number;
+	rangeTo?: number;
+	isFirst?: boolean;
+	isLast?: boolean;
 }
 
 export type PaginationDataRequest<T = any> = (

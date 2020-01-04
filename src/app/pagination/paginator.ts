@@ -16,8 +16,7 @@ export class Paginator<T = any> {
 		searchTerm: ''
 	});
 
-	isLoading$ = new BehaviorSubject(false);
-
+	protected isLoading = new BehaviorSubject(false);
 	protected config: PaginatorConfig;
 	protected pages = new Map<number, (string | number)[]>([]);
 	protected cancelRequest$ = new Subject();
@@ -26,8 +25,8 @@ export class Paginator<T = any> {
 		this.setConfig(config);
 	}
 
-	get isLoading() {
-		return this.isLoading$.asObservable();
+	get isLoading$() {
+		return this.isLoading.asObservable();
 	}
 
 	get pagination(): PaginationResponse<T> {
@@ -35,7 +34,15 @@ export class Paginator<T = any> {
 	}
 
 	get pagination$() {
-		return this._pagination$.asObservable();
+		return this._pagination$.asObservable().pipe(
+			map(pagination => ({
+				...pagination,
+				rangeFrom: this.getFrom(),
+				rangeTo: this.getTo(),
+				isFirst: this.isFirst(),
+				isLast: this.isLast()
+			}))
+		);
 	}
 
 	get currentPage() {
@@ -44,46 +51,6 @@ export class Paginator<T = any> {
 
 	get pageSize() {
 		return this.pagination.pageSize;
-	}
-
-	get isFirst() {
-		return this.currentPage === 0;
-	}
-
-	get isLast() {
-		return this.currentPage === this.pagination.totalPages - 1;
-	}
-
-	get isFirst$() {
-		return this.pagination$.pipe(map(pagination => pagination.currentPage === 0));
-	}
-
-	get isLast$() {
-		return this.pagination$.pipe(
-			map(pagination => pagination.currentPage === pagination.totalPages - 1)
-		);
-	}
-
-	get from$() {
-		return this.pagination$.pipe(
-			map(() => (this.isFirst ? 1 : this.currentPage * this.pageSize + 1))
-		);
-	}
-
-	get to$() {
-		return this.pagination$.pipe(
-			map(() =>
-				this.isLast ? this.pagination.totalRecords : (this.currentPage + 1) * this.pageSize
-			)
-		);
-	}
-
-	get totalPages$() {
-		return this.pagination$.pipe(map(pagination => pagination.totalPages));
-	}
-
-	get totalRecords$() {
-		return this.pagination$.pipe(map(pagination => pagination.totalRecords));
 	}
 
 	get pageChanges() {
@@ -98,10 +65,6 @@ export class Paginator<T = any> {
 			map(({ searchTerm }) => searchTerm),
 			distinctUntilChanged()
 		);
-	}
-
-	get data$() {
-		return this.pagination$.pipe(map(pagination => pagination.data));
 	}
 
 	get dataSource$() {
@@ -130,6 +93,7 @@ export class Paginator<T = any> {
 
 	refreshCurrentPage(): void {
 		if (this.currentPage >= 0) {
+			this.removePage(this.currentPage);
 			this.setPage(this.currentPage);
 		}
 	}
@@ -158,7 +122,7 @@ export class Paginator<T = any> {
 	}
 
 	setLoading(loading: boolean) {
-		this.isLoading$.next(loading);
+		this.isLoading.next(loading);
 	}
 
 	setConfig(config: Partial<PaginatorConfig> = {}) {
@@ -185,6 +149,22 @@ export class Paginator<T = any> {
 		}
 		// this.setConfig({});
 		// this.setPage(0);
+	}
+
+	getFrom() {
+		return this.isFirst() ? 1 : this.currentPage * this.pageSize + 1;
+	}
+
+	getTo() {
+		return this.isLast() ? this.pagination.totalRecords : (this.currentPage + 1) * this.pageSize;
+	}
+
+	isFirst() {
+		return this.currentPage === 0;
+	}
+
+	isLast() {
+		return this.currentPage === this.pagination.totalPages - 1;
 	}
 
 	protected setPagination(config: Partial<PaginationResponse<T>>) {
@@ -255,5 +235,9 @@ export class Paginator<T = any> {
 	protected clearCache() {
 		this.pages.clear();
 		this.config.dataSource.clear();
+	}
+
+	protected removePage(currentPage: number) {
+		this.pages.delete(currentPage);
 	}
 }

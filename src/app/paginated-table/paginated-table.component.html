@@ -1,41 +1,42 @@
-<div class="btn-group">
-    <button (click)="firstPage()">First</button>
-    <button (click)="prevPage()">Prev</button>
-    <button (click)="nextPage()">Next</button>
-    <button (click)="lastPage()">Last</button>
-    <button (click)="refresh()">Refresh</button>
-</div>
-<input [formControl]="searchTerm">
-<table>
-    <thead>
-    <tr>
-        <th>Is First</th>
-        <th>Is Last</th>
-        <th>Current Page</th>
-        <th>Search term</th>
-        <th>From</th>
-        <th>To</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>{{isFirst$ | async}}</td>
-        <td>{{isLast$ | async}}</td>
-        <td>{{currentPage$ | async}}</td>
-        <td>{{searchTerm$ | async}}</td>
-        <td>{{from$ | async}}</td>
-        <td>{{to$ | async}}</td>
-    </tr>
-    </tbody>
-</table>
-
-<hr>
-
-<div *ngIf="isLoading$ | async; else data">Loading...</div>
-<ng-template #data>
-    <div style="display: flex; justify-content: space-evenly">
-        <app-user-table [data]="data$ | async" title="Page data"></app-user-table>
-        <app-user-table [data]="dataSource$ | async" title="All data"></app-user-table>
+<ng-container *ngIf="pagination$ | async as pagination">
+    <div class="btn-group">
+        <button (click)="firstPage()">First</button>
+        <button (click)="prevPage()">Prev</button>
+        <button (click)="nextPage()">Next</button>
+        <button (click)="lastPage()">Last</button>
+        <button (click)="refresh()">Refresh</button>
     </div>
-</ng-template>
+    <input [formControl]="searchTerm">
+    <table>
+        <thead>
+        <tr>
+            <th>Is First</th>
+            <th>Is Last</th>
+            <th>Current Page</th>
+            <th>Search term</th>
+            <th>From</th>
+            <th>To</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{pagination.isFirst}}</td>
+            <td>{{pagination.isLast}}</td>
+            <td>{{pagination.currentPage}}</td>
+            <td>{{pagination.searchTerm}}</td>
+            <td>{{pagination.rangeFrom}}</td>
+            <td>{{pagination.rangeTo}}</td>
+        </tr>
+        </tbody>
+    </table>
 
+    <hr>
+
+    <div *ngIf="isLoading$ | async; else data">Loading...</div>
+    <ng-template #data>
+        <div style="display: flex; justify-content: space-evenly">
+            <app-user-table [data]="pagination.data" title="Page data"></app-user-table>
+            <app-user-table [data]="dataSource$ | async" title="All data"></app-user-table>
+        </div>
+    </ng-template>
+</ng-container>
