@@ -14,7 +14,6 @@ import { UserServiceStub } from './stores/user-stub-store/users-service';
 	providers: [Paginator]
 })
 export class AppComponent {
-	initialized = false;
 	petsConfig: Partial<PaginatorConfig>;
 
 	constructor(
@@ -47,21 +46,6 @@ export class AppComponent {
 				)
 			)
 			.subscribe();
-	}
-
-	onSelected(value: number) {
-		switch (+value) {
-			case 1:
-				this.setStubSource();
-				break;
-			case 2:
-				this.setAkitaSource();
-				break;
-			case 3:
-				this.manualRequests();
-				break;
-		}
-		this.initialized = true;
 	}
 
 	private setStubSource() {
