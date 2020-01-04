@@ -1,17 +1,24 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { PaginationDataSource, PaginationResponse } from '../pagination/models/pagination';
+import { map } from 'rxjs/operators';
+import { PaginationDataSource, PaginationResponse } from './pagination';
 
 export class DataSource<T> implements PaginationDataSource {
 	data$ = new BehaviorSubject([]);
 
+	dataMapper: Function = (data: T[]) => data;
+
 	constructor(private idKey: string = 'id') {}
 
 	getData(): Observable<T[]> {
-		return this.data$.asObservable();
+		return this.data$.asObservable().pipe(map(data => this.dataMapper(data)));
 	}
 
 	getIdKey() {
 		return this.idKey;
+	}
+
+	clear(): void {
+		this.data$ = new BehaviorSubject([]);
 	}
 
 	setData(data: PaginationResponse<T>) {
@@ -24,9 +31,7 @@ export class DataSource<T> implements PaginationDataSource {
 	}
 
 	private appendData(data: T[]) {
-		const filtered = [...this.data$.getValue(), ...this.filterExisting(data)].sort(
-			(a, b) => a.id - b.id
-		);
+		const filtered = [...this.data$.getValue(), ...this.filterExisting(data)];
 		return filtered;
 	}
 

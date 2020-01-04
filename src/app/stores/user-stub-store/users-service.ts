@@ -7,7 +7,7 @@ import { pagingToPaginationResponse } from '../../pagination/pagionation.helpers
 import { DummyServer } from '../../server/dummy-server';
 import { USERS_MOCK } from '../../server/user-data';
 import { User } from './user';
-import { DataSource } from '../data-source';
+import { DataSource } from '../../pagination/models/data-source';
 
 @Injectable({
 	providedIn: 'root'

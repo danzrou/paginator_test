@@ -78,6 +78,14 @@ export class Paginator<T = any> {
 		);
 	}
 
+	get totalPages$() {
+		return this.pagination$.pipe(map(pagination => pagination.totalPages));
+	}
+
+	get totalRecords$() {
+		return this.pagination$.pipe(map(pagination => pagination.totalRecords));
+	}
+
 	get pageChanges() {
 		return this.pagination$.pipe(
 			map(({ currentPage }) => currentPage),
@@ -97,7 +105,7 @@ export class Paginator<T = any> {
 	}
 
 	get dataSource$() {
-		return this.config.dataSource.getData();
+		return this.config.dataSource && this.config.dataSource.getData();
 	}
 
 	firstPage(): void {
@@ -161,12 +169,9 @@ export class Paginator<T = any> {
 	getPage(request: Observable<PaginationResponse<T>>): Observable<PaginationResponse<T>> {
 		this.cancelRequest$.next();
 		this.setLoading(true);
-		let obs: Observable<PaginationResponse<T>>;
-		if (this.isCurrentPageInCache()) {
-			obs = this.getCurrentPageFromCache();
-		} else {
-			obs = request.pipe(tap(data => this.onPaginationResponse(data)));
-		}
+		const obs = this.isCurrentPageInCache()
+			? this.getCurrentPageFromCache()
+			: request.pipe(tap(data => this.onPaginationResponse(data)));
 
 		return obs.pipe(
 			takeUntil(this.cancelRequest$),
@@ -174,10 +179,12 @@ export class Paginator<T = any> {
 		);
 	}
 
-	destroy() {
-		this.clearCache();
-		this.setConfig({});
-		this.setPage(0);
+	destroy(config: { clearCache?: boolean } = { clearCache: true }) {
+		if (config.clearCache) {
+			this.clearCache();
+		}
+		// this.setConfig({});
+		// this.setPage(0);
 	}
 
 	protected setPagination(config: Partial<PaginationResponse<T>>) {
@@ -247,5 +254,6 @@ export class Paginator<T = any> {
 
 	protected clearCache() {
 		this.pages.clear();
+		this.config.dataSource.clear();
 	}
 }

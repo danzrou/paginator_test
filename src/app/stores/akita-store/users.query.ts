@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { EntityStore, QueryEntity } from '@datorama/akita';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { User } from '../user-stub-store/user';
 import { PaginationDataSource } from '../../pagination/models/pagination';
+import { User } from '../user-stub-store/user';
 import { UsersState, UsersStore } from './users.store';
 
 @Injectable({ providedIn: 'root' })
@@ -22,5 +22,9 @@ export class UsersQuery extends QueryEntity<UsersState> implements PaginationDat
 
 	getIdKey(): string | number {
 		return (this.__store__ as EntityStore).idKey;
+	}
+
+	clear(): void {
+		this.__store__.remove();
 	}
 }

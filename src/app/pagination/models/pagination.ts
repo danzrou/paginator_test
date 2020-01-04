@@ -12,11 +12,12 @@ export interface PaginationResponse<T = any> {
 	searchTerm: string;
 }
 
-export interface PaginationDataSource<T = any> {
-	getData(): Observable<T[]>;
-	getIdKey(): string | number;
-}
-
 export type PaginationDataRequest<T = any> = (
 	request: PagingRequest
 ) => Observable<PaginationResponse<T>>;
+
+export interface PaginationDataSource<T = any> {
+	getData(): Observable<T[]>;
+	getIdKey(): string | number;
+	clear(): void;
+}

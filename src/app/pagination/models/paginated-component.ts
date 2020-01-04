@@ -2,7 +2,7 @@ import { Input, OnDestroy, OnInit } from '@angular/core';
 import { Paginator } from '../paginator';
 import { PaginatorConfig } from '../paginator.config';
 
-export abstract class PaginatedComponent implements OnInit, OnDestroy {
+export abstract class PaginatedComponent<T = any> implements OnInit, OnDestroy {
 	@Input() config: Partial<PaginatorConfig>;
 
 	data$ = this.paginator.data$;
@@ -14,8 +14,10 @@ export abstract class PaginatedComponent implements OnInit, OnDestroy {
 	searchTerm$ = this.paginator.searchChanges;
 	from$ = this.paginator.from$;
 	to$ = this.paginator.to$;
+	totalPages$ = this.paginator.totalPages$;
+	totalRecords$ = this.paginator.totalRecords$;
 
-	protected constructor(protected paginator: Paginator) {}
+	protected constructor(protected paginator: Paginator<T>) {}
 
 	ngOnInit() {
 		if (this.config) {
@@ -63,5 +65,7 @@ export abstract class PaginatedComponent implements OnInit, OnDestroy {
 		this.searchTerm$ = this.paginator.searchChanges;
 		this.from$ = this.paginator.from$;
 		this.to$ = this.paginator.to$;
+		this.totalPages$ = this.paginator.totalPages$;
+		this.totalRecords$ = this.paginator.totalRecords$;
 	}
 }

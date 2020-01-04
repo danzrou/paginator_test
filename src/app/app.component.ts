@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
 import { switchMap } from 'rxjs/operators';
-import { PAGINATOR } from './pagination/injection-tokens';
 import { Paginator } from './pagination/paginator';
 import { PaginatorConfig } from './pagination/paginator.config';
 import { UsersQuery } from './stores/akita-store/users.query';
@@ -12,14 +11,14 @@ import { UserServiceStub } from './stores/user-stub-store/users-service';
 	selector: 'app-root',
 	templateUrl: './app.component.html',
 	styleUrls: ['./app.component.scss'],
-	providers: [{ provide: PAGINATOR, useClass: Paginator }]
+	providers: [Paginator]
 })
 export class AppComponent {
 	initialized = false;
 	petsConfig: Partial<PaginatorConfig>;
 
 	constructor(
-		@Inject(PAGINATOR) private paginator: Paginator,
+		private paginator: Paginator,
 		private userServiceStub: UserServiceStub,
 		private usersService: UsersService,
 		private usersQuery: UsersQuery,

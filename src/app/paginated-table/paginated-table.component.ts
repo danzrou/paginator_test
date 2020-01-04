@@ -1,7 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { debounceTime, tap } from 'rxjs/operators';
-import { PAGINATOR } from '../pagination/injection-tokens';
 import { PaginatedComponent } from '../pagination/models/paginated-component';
 import { Paginator } from '../pagination/paginator';
 
@@ -13,7 +12,7 @@ import { Paginator } from '../pagination/paginator';
 export class PaginatedTableComponent extends PaginatedComponent implements OnInit {
 	searchTerm = new FormControl('');
 
-	constructor(@Inject(PAGINATOR) protected paginator: Paginator) {
+	constructor(protected paginator: Paginator) {
 		super(paginator);
 	}
 
