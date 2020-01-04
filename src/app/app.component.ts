@@ -67,13 +67,13 @@ export class AppComponent {
 	private setStubSource() {
 		this.paginator.setConfig({
 			getPageRequest: this.userServiceStub.getPage.bind(this.userServiceStub),
-			dataSource: this.dataSource.getData()
+			dataSource: this.dataSource
 		});
 	}
 
 	private setAkitaSource() {
 		this.paginator.setConfig({
-			dataSource: this.usersQuery.getData(),
+			dataSource: this.usersQuery,
 			getPageRequest: this.usersService.getPage.bind(this.usersService)
 		});
 	}

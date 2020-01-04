@@ -97,7 +97,7 @@ export class Paginator<T = any> {
 	}
 
 	get dataSource$() {
-		return this.config.dataSource;
+		return this.config.dataSource.getData();
 	}
 
 	firstPage(): void {
@@ -198,13 +198,13 @@ export class Paginator<T = any> {
 	protected updatePage(data: T[]) {
 		this.pages.set(
 			this.currentPage,
-			data.map(item => item[this.config.idKey])
+			data.map(item => item[this.getIdKey()])
 		);
 	}
 
 	protected filterPage(data: T[]) {
 		const currentPage = this.pages.get(this.currentPage);
-		return data.filter(item => currentPage.includes(item[this.config.idKey]));
+		return data.filter(item => currentPage.includes(item[this.getIdKey()]));
 	}
 
 	protected isCurrentPageInCache() {
@@ -218,7 +218,7 @@ export class Paginator<T = any> {
 	}
 
 	protected getCurrentPageFromCache() {
-		return this.config.dataSource.pipe(
+		return this.config.dataSource.getData().pipe(
 			take(1),
 			map(data => this.filterPage(data)),
 			tap(data => this.setPagination({ data }))
@@ -229,5 +229,9 @@ export class Paginator<T = any> {
 		interval(this.config.cacheTTL)
 			.pipe(take(1))
 			.subscribe(() => this.pages.delete(data.currentPage));
+	}
+
+	protected getIdKey() {
+		return this.config.dataSource.getIdKey();
 	}
 }

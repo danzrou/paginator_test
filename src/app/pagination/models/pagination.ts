@@ -18,6 +18,7 @@ export interface PaginationService<T = any> {
 
 export interface PaginationDataSource<T = any> {
 	getData(): Observable<T[]>;
+	getIdKey(): string | number;
 }
 
 export type PaginationDataRequest<T = any> = (

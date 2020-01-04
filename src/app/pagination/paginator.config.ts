@@ -1,12 +1,10 @@
-import { EMPTY, Observable } from 'rxjs';
-import { PaginationDataRequest } from './models/pagination';
+import { PaginationDataRequest, PaginationDataSource } from './models/pagination';
 
 export class PaginatorConfig<T = any> {
-	cacheTTL = 10000;
-	idKey = 'id';
-	makeRequests = true;
-	dataSource: Observable<T[]> = EMPTY;
-	getPageRequest: PaginationDataRequest = () => EMPTY;
+	dataSource: PaginationDataSource;
+	cacheTTL?: number = 10000;
+	makeRequests?: boolean = true;
+	getPageRequest?: PaginationDataRequest;
 
 	constructor(config: Partial<PaginatorConfig> = {}) {
 		Object.assign(this, config);
