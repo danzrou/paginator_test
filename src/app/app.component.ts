@@ -1,11 +1,12 @@
 import { Component, Inject } from '@angular/core';
 import { switchMap } from 'rxjs/operators';
-import { UsersQuery } from './pagination/akita-store/users.query';
-import { UsersService } from './pagination/akita-store/users.service';
 import { PAGINATOR } from './pagination/injection-tokens';
 import { Paginator } from './pagination/paginator';
-import { DataSource } from './pagination/paging-store/data-source';
-import { UserServiceStub } from './pagination/paging-store/users-service';
+import { PaginatorConfig } from './pagination/paginator.config';
+import { UsersQuery } from './stores/akita-store/users.query';
+import { UsersService } from './stores/akita-store/users.service';
+import { PetServiceStub } from './stores/pet-stub-store/pet-service';
+import { UserServiceStub } from './stores/user-stub-store/users-service';
 
 @Component({
 	selector: 'app-root',
@@ -15,21 +16,21 @@ import { UserServiceStub } from './pagination/paging-store/users-service';
 })
 export class AppComponent {
 	initialized = false;
+	petsConfig: Partial<PaginatorConfig>;
 
 	constructor(
 		@Inject(PAGINATOR) private paginator: Paginator,
-		private dataSource: DataSource,
 		private userServiceStub: UserServiceStub,
 		private usersService: UsersService,
-		private usersQuery: UsersQuery
-	) {}
+		private usersQuery: UsersQuery,
+		private petsService: PetServiceStub
+	) {
+		this.petsConfig = {
+			dataSource: this.petsService.getDataSource(),
+			getPageRequest: this.petsService.getPets.bind(this.petsService)
+		};
 
-	refresh() {
-		this.paginator.refreshCurrentPage();
-	}
-
-	search(query: string) {
-		this.paginator.search(query);
+		this.setStubSource();
 	}
 
 	manualRequests() {
@@ -67,7 +68,7 @@ export class AppComponent {
 	private setStubSource() {
 		this.paginator.setConfig({
 			getPageRequest: this.userServiceStub.getPage.bind(this.userServiceStub),
-			dataSource: this.dataSource
+			dataSource: this.userServiceStub.getDataSource()
 		});
 	}
 

@@ -128,6 +128,7 @@ export class Paginator<T = any> {
 
 	search(searchTerm: string): void {
 		this.setPagination({ searchTerm, currentPage: 0 });
+		this.clearCache();
 		this.fetchPageIfNeeded();
 	}
 
@@ -171,6 +172,12 @@ export class Paginator<T = any> {
 			takeUntil(this.cancelRequest$),
 			finalize(() => this.setLoading(false))
 		);
+	}
+
+	destroy() {
+		this.clearCache();
+		this.setConfig({});
+		this.setPage(0);
 	}
 
 	protected setPagination(config: Partial<PaginationResponse<T>>) {
@@ -236,5 +243,9 @@ export class Paginator<T = any> {
 
 	protected getIdKey() {
 		return this.config.dataSource.getIdKey();
+	}
+
+	protected clearCache() {
+		this.pages.clear();
 	}
 }

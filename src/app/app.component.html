@@ -1,14 +1,5 @@
-<select *ngIf="!initialized" (change)="onSelected($event.target.value)">
-    <option disabled selected>Choose</option>
-    <option [value]="1">Stub</option>
-    <option [value]="2">Akita</option>
-    <option [value]="3">Manual requests</option>
-</select>
-<ng-container *ngIf="initialized">
-    <input #searchTerm>
-    <button (click)="search(searchTerm.value)">Search</button>
-    <br/>
-    <button (click)="refresh()">Refresh</button>
-    <hr>
-    <app-paginated-table></app-paginated-table>
-</ng-container>
+<h3>Users</h3>
+<app-paginated-table></app-paginated-table>
+<hr>
+<h3>Pets</h3>
+<app-paginated-table [config]="petsConfig"></app-paginated-table>

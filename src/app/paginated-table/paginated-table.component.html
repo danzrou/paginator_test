@@ -22,7 +22,7 @@
         <td>{{isFirst$ | async}}</td>
         <td>{{isLast$ | async}}</td>
         <td>{{currentPage$ | async}}</td>
-        <td>{{search$ | async}}</td>
+        <td>{{searchTerm$ | async}}</td>
         <td>{{from$ | async}}</td>
         <td>{{to$ | async}}</td>
     </tr>
@@ -34,9 +34,8 @@
 <div *ngIf="isLoading$ | async; else data">Loading...</div>
 <ng-template #data>
     <div style="display: flex; justify-content: space-evenly">
-        <app-user-table [users]="data$ | async" title="Page data"></app-user-table>
-        <app-user-table [users]="dataSource$ | async" title="All data"></app-user-table>
+        <app-user-table [data]="data$ | async" title="Page data"></app-user-table>
+        <app-user-table [data]="dataSource$ | async" title="All data"></app-user-table>
     </div>
-
 </ng-template>
 

@@ -1,6 +1,6 @@
-import { User } from '../user';
+import { User } from '../stores/user-stub-store/user';
 
-export const users: User[] = [
+export const USERS_MOCK: User[] = [
   {firstName: 'Gertrude', lastName: 'Blackmore', age: 71, id: 1},
   {firstName: 'Babara', lastName: 'Moultrie', age: 32, id: 2},
   {firstName: 'Happy', lastName: 'Beche', age: 73, id: 3},

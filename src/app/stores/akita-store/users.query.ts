@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { EntityStore, QueryEntity } from '@datorama/akita';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { User } from '../../user';
-import { PaginationDataSource } from '../models/pagination';
+import { User } from '../user-stub-store/user';
+import { PaginationDataSource } from '../../pagination/models/pagination';
 import { UsersState, UsersStore } from './users.store';
 
 @Injectable({ providedIn: 'root' })

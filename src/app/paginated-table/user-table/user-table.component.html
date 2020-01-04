@@ -1,19 +1,13 @@
 <h3 style="text-decoration: underline">{{title}}</h3>
-<table *ngIf="users" class="users">
+<table *ngIf="data" class="users">
     <thead>
     <tr>
-        <th>ID</th>
-        <th>First name</th>
-        <th>Last name</th>
-        <th>Age</th>
+        <th *ngFor="let key of getKeys(data[0])">{{key | uppercase}}</th>
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let user of users">
-        <td>{{user.id}}</td>
-        <td>{{user.firstName}}</td>
-        <td>{{user.lastName}}</td>
-        <td>{{user.age}}</td>
+    <tr *ngFor="let item of data">
+        <td *ngFor="let key of getKeys(item)">{{item[key]}}</td>
     </tr>
     </tbody>
 </table>

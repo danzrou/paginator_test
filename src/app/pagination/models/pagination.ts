@@ -12,10 +12,6 @@ export interface PaginationResponse<T = any> {
 	searchTerm: string;
 }
 
-export interface PaginationService<T = any> {
-	getPage(request: PagingRequest): Observable<PaginationResponse<T>>;
-}
-
 export interface PaginationDataSource<T = any> {
 	getData(): Observable<T[]>;
 	getIdKey(): string | number;
