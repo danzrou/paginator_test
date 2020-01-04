@@ -13,6 +13,10 @@ export class DataSource implements PaginationDataSource {
 		return this.data$.asObservable();
 	}
 
+	getIdKey() {
+		return 'id';
+	}
+
 	setData(data: User[]) {
 		const filtered = [...this.data$.getValue(), ...this.filterExisting(data)].sort(
 			(a, b) => a.id - b.id
