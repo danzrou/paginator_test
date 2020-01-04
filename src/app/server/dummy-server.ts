@@ -20,9 +20,8 @@ export class DummyServer {
 	}
 
 	private getUserByPage(pageSize: number, requestedPage: number) {
-		const pages = this.getTotalPages(pageSize);
 		const filteredUsers = [];
-		const startIndex = (pages * requestedPage) / pageSize;
+		const startIndex = requestedPage * pageSize;
 
 		for (let i = 0, k = startIndex; i < pageSize; i++, k++) {
 			filteredUsers.push(users[k]);

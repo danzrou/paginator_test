@@ -7,13 +7,22 @@ import { PaginationDataSource } from '../models/pagination';
 	providedIn: 'root'
 })
 export class DataSource implements PaginationDataSource {
-	data$ = new BehaviorSubject(null);
+	data$ = new BehaviorSubject([]);
 
 	getData(): Observable<any[]> {
 		return this.data$.asObservable();
 	}
 
 	setData(data: User[]) {
-		this.data$.next(data);
+		const filtered = [...this.data$.getValue(), ...this.filterExisting(data)].sort(
+			(a, b) => a.id - b.id
+		);
+		console.log('filtered', filtered);
+		this.data$.next(filtered);
+	}
+
+	private filterExisting(data: User[]) {
+		const current = this.data$.getValue().map(user => user.id);
+		return data.filter(user => !current.includes(user.id));
 	}
 }

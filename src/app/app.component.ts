@@ -24,18 +24,6 @@ export class AppComponent {
 		private usersQuery: UsersQuery
 	) {}
 
-	private setStubSource() {
-		this.paginator
-			.setDataSource(this.dataSource.getData())
-			.setDataRequest(this.userServiceStub.getPage.bind(this.userServiceStub));
-	}
-
-	private setAkitaSource() {
-		this.paginator
-			.setDataSource(this.usersQuery.getData())
-			.setDataRequest(this.usersService.getPage.bind(this.usersService));
-	}
-
 	refresh() {
 		this.paginator.refreshCurrentPage();
 	}
@@ -74,5 +62,17 @@ export class AppComponent {
 				break;
 		}
 		this.initialized = true;
+	}
+
+	private setStubSource() {
+		this.paginator
+			.setDataSource(this.dataSource.getData())
+			.setDataRequest(this.userServiceStub.getPage.bind(this.userServiceStub));
+	}
+
+	private setAkitaSource() {
+		this.paginator
+			.setDataSource(this.usersQuery.getData())
+			.setDataRequest(this.usersService.getPage.bind(this.usersService));
 	}
 }
