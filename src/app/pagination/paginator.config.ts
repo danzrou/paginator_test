@@ -1,4 +1,5 @@
-import { PaginationDataRequest, PaginationDataSource } from './models/pagination';
+import { PaginationDataSource } from './models/data-source';
+import { PaginationDataRequest } from './models/pagination';
 
 export class PaginatorConfig<T = any> {
 	dataSource: PaginationDataSource;

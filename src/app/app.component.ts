@@ -29,7 +29,7 @@ export class AppComponent {
 			getPageRequest: this.petsService.getPets.bind(this.petsService)
 		};
 
-		this.setStubSource();
+		this.setAkitaSource();
 	}
 
 	manualRequests() {

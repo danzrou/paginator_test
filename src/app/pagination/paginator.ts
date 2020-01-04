@@ -234,7 +234,7 @@ export class Paginator<T = any> {
 
 	protected clearCache() {
 		this.pages.clear();
-		this.config.dataSource.clear();
+		this.config.dataSource.destroy();
 	}
 
 	protected removePage(currentPage: number) {

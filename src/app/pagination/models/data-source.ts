@@ -1,42 +1,37 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { PaginationDataSource, PaginationResponse } from './pagination';
+import { EntityState, EntityStore, getEntityType, QueryEntity } from '@datorama/akita';
+import { Observable } from 'rxjs';
+import { PaginationResponse } from './pagination';
 
-export class DataSource<T> implements PaginationDataSource {
-	data$ = new BehaviorSubject([]);
+export interface PaginationDataSource<T = any> {
+	getData(): Observable<T[]>;
+	getIdKey(): string | number;
+	destroy(): void;
+}
 
-	dataMapper: Function = (data: T[]) => data;
+export class TempDataSource<S extends EntityState, T = getEntityType<S>>
+	implements PaginationDataSource<T> {
+	store: EntityStore<S>;
+	query: QueryEntity<S>;
 
-	constructor(private idKey: string = 'id') {}
+	constructor(storeName: string, private idKey: string = 'id') {
+		this.store = new EntityStore<S>({}, { idKey, resettable: true, name: storeName });
+		this.query = new QueryEntity<S>(this.store);
+	}
 
 	getData(): Observable<T[]> {
-		return this.data$.asObservable().pipe(map(data => this.dataMapper(data)));
+		return this.query.selectAll();
 	}
 
 	getIdKey() {
 		return this.idKey;
 	}
 
-	clear(): void {
-		this.data$ = new BehaviorSubject([]);
+	destroy(): void {
+		this.store.destroy();
+		this.query = null;
 	}
 
 	setData(data: PaginationResponse<T>) {
-		const _data = this.filterDataIfNeeded(data);
-		this.data$.next(_data);
-	}
-
-	private filterDataIfNeeded(response: PaginationResponse<T>): T[] {
-		return response.searchTerm ? response.data : this.appendData(response.data);
-	}
-
-	private appendData(data: T[]) {
-		const filtered = [...this.data$.getValue(), ...this.filterExisting(data)];
-		return filtered;
-	}
-
-	private filterExisting(data: T[]) {
-		const current = this.data$.getValue().map(item => item[this.idKey]);
-		return data.filter(item => !current.includes(item[this.idKey]));
+		this.store.add(data.data as any);
 	}
 }

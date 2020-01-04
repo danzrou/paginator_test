@@ -7,13 +7,13 @@ import { pagingToPaginationResponse } from '../../pagination/pagination.helpers'
 import { Pet } from './pet';
 import { DummyServer } from '../../server/dummy-server';
 import { PET_MOCK } from '../../server/pet-data';
-import { DataSource } from '../../pagination/models/data-source';
+import { TempDataSource } from '../../pagination/models/data-source';
 
 @Injectable({
 	providedIn: 'root'
 })
 export class PetServiceStub {
-	private ds = new DataSource();
+	private ds = new TempDataSource('Pets');
 	private server = new DummyServer<Pet>(PET_MOCK);
 
 	getPets(request: PagingRequest): Observable<PaginationResponse<Pet>> {
