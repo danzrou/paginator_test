@@ -33,7 +33,7 @@ export class AppComponent {
 	}
 
 	manualRequests() {
-		this.paginator.makeRequests(false);
+		this.paginator.setConfig({ makeRequests: false });
 		this.paginator.pageChanges
 			.pipe(
 				switchMap(page =>
@@ -65,14 +65,16 @@ export class AppComponent {
 	}
 
 	private setStubSource() {
-		this.paginator
-			.setDataSource(this.dataSource.getData())
-			.setDataRequest(this.userServiceStub.getPage.bind(this.userServiceStub));
+		this.paginator.setConfig({
+			getPageRequest: this.userServiceStub.getPage.bind(this.userServiceStub),
+			dataSource: this.dataSource.getData()
+		});
 	}
 
 	private setAkitaSource() {
-		this.paginator
-			.setDataSource(this.usersQuery.getData())
-			.setDataRequest(this.usersService.getPage.bind(this.usersService));
+		this.paginator.setConfig({
+			dataSource: this.usersQuery.getData(),
+			getPageRequest: this.usersService.getPage.bind(this.usersService)
+		});
 	}
 }

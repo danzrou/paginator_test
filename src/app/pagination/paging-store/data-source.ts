@@ -17,7 +17,6 @@ export class DataSource implements PaginationDataSource {
 		const filtered = [...this.data$.getValue(), ...this.filterExisting(data)].sort(
 			(a, b) => a.id - b.id
 		);
-		console.log('filtered', filtered);
 		this.data$.next(filtered);
 	}
 

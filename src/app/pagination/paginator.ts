@@ -2,7 +2,7 @@ import { Inject, Injectable, Optional } from '@angular/core';
 import { BehaviorSubject, interval, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, finalize, map, take, takeUntil, tap } from 'rxjs/operators';
 import { PAGINATOR_CONFIG } from './injection-tokens';
-import { PaginationDataRequest, PaginationResponse } from './models/pagination';
+import { PaginationResponse } from './models/pagination';
 import { PaginatorConfig } from './paginator.config';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class Paginator<T = any> {
 	protected cancelRequest$ = new Subject();
 
 	constructor(@Optional() @Inject(PAGINATOR_CONFIG) config: Partial<PaginatorConfig> = {}) {
-		this.config = new PaginatorConfig(config);
+		this.setConfig(config);
 	}
 
 	get isLoading() {
@@ -96,6 +96,10 @@ export class Paginator<T = any> {
 		return this.pagination$.pipe(map(pagination => pagination.data));
 	}
 
+	get dataSource$() {
+		return this.config.dataSource;
+	}
+
 	firstPage(): void {
 		this.setPage(0);
 	}
@@ -148,28 +152,8 @@ export class Paginator<T = any> {
 		this.isLoading$.next(loading);
 	}
 
-	setDataRequest(request: PaginationDataRequest<T>): this {
-		this.config.getPageRequest = request;
-		return this;
-	}
-
-	setDataSource(source: Observable<T[]>) {
-		this.config.dataSource = source;
-		return this;
-	}
-
-	append(): this {
-		this.config.append = true;
-		return this;
-	}
-
-	setIdKey(idKey: string) {
-		this.config.idKey = idKey;
-		return this;
-	}
-
-	makeRequests(make: boolean) {
-		this.config.makeRequests = make;
+	setConfig(config: Partial<PaginatorConfig> = {}) {
+		this.config = new PaginatorConfig(config);
 		return this;
 	}
 

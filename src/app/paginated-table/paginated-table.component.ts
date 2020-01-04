@@ -14,7 +14,7 @@ export class PaginatedTableComponent implements OnInit {
 	data$ = this.paginator.data$;
 	isLoading$ = this.paginator.isLoading;
 	pagination$ = this.paginator.pagination$;
-
+	dataSource$ = this.paginator.dataSource$;
 	isFirst$ = this.paginator.isFirst$;
 	isLast$ = this.paginator.isLast$;
 	currentPage$ = this.paginator.pageChanges;

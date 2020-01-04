@@ -8,30 +8,48 @@
 <input [formControl]="searchTerm">
 
 <hr>
-<h4>Props</h4>
-<div class="props">
-    <div>isFirst
-        <pre>{{isFirst$ | async | json}}</pre>
-    </div>
-    <div>isLast
-        <pre>{{isLast$ | async | json}}</pre>
-    </div>
-    <div>Current page
-        <pre>{{currentPage$ | async | json}}</pre>
-    </div>
-    <div>Search
-        <pre>{{search$ | async | json}}</pre>
-    </div>
-    <div>From
-        <pre>{{from$ | async | json}}</pre>
-    </div>
-    <div>To
-        <pre>{{to$ | async | json}}</pre>
-    </div>
-</div>
+<table>
+    <thead>
+    <tr>
+        <th>Is First</th>
+        <th>Is Last</th>
+        <th>Current Page</th>
+        <th>Search term</th>
+        <th>From</th>
+        <th>To</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>{{isFirst$ | async}}</td>
+        <td>{{isLast$ | async}}</td>
+        <td>{{currentPage$ | async}}</td>
+        <td>{{search$ | async}}</td>
+        <td>{{from$ | async}}</td>
+        <td>{{to$ | async}}</td>
+    </tr>
+    </tbody>
+</table>
 
 <div *ngIf="isLoading$ | async; else data">Loading...</div>
 <ng-template #data>
-    <pre>{{data$ | async | json}}</pre>
+    <table *ngIf="(dataSource$ | async) as users" class="users">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>Age</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let user of users">
+            <td>{{user.id}}</td>
+            <td>{{user.firstName}}</td>
+            <td>{{user.lastName}}</td>
+            <td>{{user.age}}</td>
+        </tr>
+        </tbody>
+    </table>
 </ng-template>
 

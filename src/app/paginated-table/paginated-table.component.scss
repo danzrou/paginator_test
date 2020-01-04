@@ -1,13 +1,16 @@
+table {
+	border: 1px solid #ccc;
+	margin-bottom: 1rem;
 
+	&.users {
+		th,
+		td {
+			padding: 15px;
+		}
+	}
 
-.props {
-	border: 1px dashed #ccc;
-	padding: 5px;
-	width: 50%;
-
-	pre {
-		display: inline-block;
-		margin-left: 1.5rem;
-		font-weight: bold;
+	th,
+	td {
+		border: 1px solid #ccc;
 	}
 }

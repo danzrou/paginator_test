@@ -2,7 +2,6 @@ import { EMPTY, Observable } from 'rxjs';
 import { PaginationDataRequest } from './models/pagination';
 
 export class PaginatorConfig<T = any> {
-	append = false;
 	cacheTTL = 10000;
 	idKey = 'id';
 	makeRequests = true;
