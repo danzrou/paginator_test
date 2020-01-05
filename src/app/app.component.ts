@@ -28,11 +28,11 @@ export class AppComponent {
 			getPageRequest: this.petsService.getPets.bind(this.petsService)
 		};
 
-		this.setAkitaSource();
+		this.manualRequests();
 	}
 
 	manualRequests() {
-		this.paginator.setConfig({ makeRequests: false });
+		this.paginator.setConfig({ makeRequests: false, dataSource: this.userServiceStub.getDataSource() });
 		this.paginator.pageChanges
 			.pipe(
 				switchMap(page =>

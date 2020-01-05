@@ -225,7 +225,7 @@ export class Paginator<T = any> {
 	protected initTTL(data: PaginationResponse<T>) {
 		interval(this.config.cacheTTL)
 			.pipe(take(1))
-			.subscribe(() => this.pages.delete(data.currentPage));
+			.subscribe(() => this.removePage(data.currentPage));
 	}
 
 	protected getIdKey() {
