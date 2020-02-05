@@ -5,7 +5,7 @@ export class PaginatorConfig<T = any> {
 	pageSize?: number = 20;
 	firstPage?: number = 0;
 	cacheTTL?: number = 30000;
-	clearCacheWithDataSource?: boolean = true;
+	clearCacheWithDataSource?: boolean = false;
 
 	constructor(config: Partial<PaginatorConfig> = {}) {
 		Object.assign(this, config);
