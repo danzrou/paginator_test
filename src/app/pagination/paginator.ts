@@ -1,21 +1,18 @@
 import { Inject, Injectable, Optional } from '@angular/core';
-import { BehaviorSubject, interval, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, finalize, map, take, takeUntil, tap } from 'rxjs/operators';
+import { HashMap } from '@datorama/akita';
+import { BehaviorSubject, Observable, Subject, timer } from 'rxjs';
+import { map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { PAGINATOR_CONFIG } from './injection-tokens';
 import { PaginationResponse } from './models/pagination';
 import { PaginatorConfig } from './paginator.config';
 
+export type PagingChanges = Pick<PaginationResponse, 'searchTerm' | 'currentPage'>;
+
 @Injectable()
 export class Paginator<T = any> {
-	_pagination$ = new BehaviorSubject<PaginationResponse<T>>({
-		currentPage: 0,
-		data: [],
-		pageSize: 10,
-		totalPages: 0,
-		totalRecords: 0,
-		searchTerm: ''
-	});
+	pagination: PaginationResponse<T>;
 
+	protected pageChanges: BehaviorSubject<PagingChanges>;
 	protected isLoading = new BehaviorSubject(false);
 	protected config: PaginatorConfig;
 	protected pages = new Map<number, (string | number)[]>([]);
@@ -23,52 +20,27 @@ export class Paginator<T = any> {
 
 	constructor(@Optional() @Inject(PAGINATOR_CONFIG) config: Partial<PaginatorConfig> = {}) {
 		this.setConfig(config);
+		this.initPagination();
 	}
 
 	get isLoading$() {
 		return this.isLoading.asObservable();
 	}
 
-	get pagination(): PaginationResponse<T> {
-		return this._pagination$.getValue();
-	}
-
-	get pagination$() {
-		return this._pagination$.asObservable().pipe(
-			map(pagination => ({
-				...pagination,
-				rangeFrom: this.getFrom(),
-				rangeTo: this.getTo(),
-				isFirst: this.isFirst(),
-				isLast: this.isLast()
-			}))
-		);
-	}
-
 	get currentPage() {
-		return this.pagination.currentPage;
+		return this.pageChanges.getValue().currentPage;
 	}
 
 	get pageSize() {
 		return this.pagination.pageSize;
 	}
 
-	get pageChanges() {
-		return this.pagination$.pipe(
-			map(({ currentPage }) => currentPage),
-			distinctUntilChanged()
-		);
+	get pageChanges$() {
+		return this.pageChanges.asObservable();
 	}
 
-	get searchChanges() {
-		return this.pagination$.pipe(
-			map(({ searchTerm }) => searchTerm),
-			distinctUntilChanged()
-		);
-	}
-
-	get dataSource$() {
-		return this.config.dataSource && this.config.dataSource.getData();
+	get dataSource() {
+		return this.config.dataSource;
 	}
 
 	firstPage(): void {
@@ -99,22 +71,23 @@ export class Paginator<T = any> {
 	}
 
 	search(searchTerm: string): void {
-		this.setPagination({ searchTerm, currentPage: 0 });
 		this.clearCache();
-		this.fetchPageIfNeeded();
+		this.setChanges({ searchTerm });
 	}
 
-	setPage(page: number): void {
-		this.setPagination({ currentPage: page });
-		this.fetchPageIfNeeded();
+	setPage(currentPage: number): void {
+		this.setChanges({ currentPage });
 	}
 
-	setPageSize(pageSize: number): void {
-		this.setPagination({ pageSize });
+	setChanges(changes: Partial<PagingChanges>) {
+		this.pageChanges.next({
+			...this.pageChanges.getValue(),
+			...changes
+		});
 	}
 
 	hasNext(): boolean {
-		return this.currentPage !== this.pagination.totalPages - 1;
+		return this.currentPage + 1 < this.pagination.totalPages;
 	}
 
 	hasPrev(): boolean {
@@ -132,23 +105,31 @@ export class Paginator<T = any> {
 
 	getPage(request: Observable<PaginationResponse<T>>): Observable<PaginationResponse<T>> {
 		this.cancelRequest$.next();
-		this.setLoading(true);
-		const obs = this.isCurrentPageInCache()
-			? this.getCurrentPageFromCache()
-			: request.pipe(tap(data => this.onPaginationResponse(data)));
 
-		return obs.pipe(
-			takeUntil(this.cancelRequest$),
-			finalize(() => this.setLoading(false))
-		);
+		if (this.isCurrentPageInCache()) {
+			return this.selectPage(this.currentPage);
+		} else {
+			this.setLoading(true);
+			return request.pipe(
+				switchMap(response => {
+					this.setLoading(false);
+					this.onPaginationResponse(response);
+					return this.selectPage(response.currentPage);
+				}),
+				takeUntil(this.cancelRequest$)
+			);
+		}
 	}
 
-	destroy(config: { clearCache?: boolean } = { clearCache: true }) {
-		if (config.clearCache) {
+	destroy(config: { destroyDataSource?: boolean; clearCache?: boolean } = {}) {
+		const merged = { clearCache: true, ...config };
+		if (merged.clearCache) {
 			this.clearCache();
 		}
-		// this.setConfig({});
-		// this.setPage(0);
+		if (merged.destroyDataSource) {
+			this.destroyDataSource();
+		}
+		this.initPagination();
 	}
 
 	getFrom() {
@@ -167,26 +148,41 @@ export class Paginator<T = any> {
 		return this.currentPage === this.pagination.totalPages - 1;
 	}
 
-	protected setPagination(config: Partial<PaginationResponse<T>>) {
-		this._pagination$.next({
-			...this.pagination,
-			...config
-		});
+	clearCache() {
+		this.pages.clear();
+		this.config.clearCacheWithDataSource && this.dataSource.remove();
 	}
 
-	protected fetchPageIfNeeded() {
-		if (this.config.makeRequests) {
-			if (!this.config.getPageRequest) {
-				throw new Error('Data request is not defined');
-			}
-			this.getPage(
-				this.config.getPageRequest({
-					searchTerm: this.pagination.searchTerm,
-					requestedPage: this.pagination.currentPage,
-					pageSize: this.pagination.pageSize
-				})
-			).subscribe();
-		}
+	removePage(currentPage: number) {
+		this.pages.delete(currentPage);
+	}
+
+	hasPageInCache(page: number) {
+		return this.pages.has(page);
+	}
+
+	protected selectPage(page: number): Observable<PaginationResponse<T>> {
+		return this.dataSource.selectData(true).pipe(
+			take(1),
+			map(data => {
+				const pagination: PaginationResponse<T> = {
+					...this.pagination,
+					data: this.getPageData(data, page),
+					rangeFrom: this.getFrom(),
+					rangeTo: this.getTo(),
+					isFirst: this.isFirst(),
+					isLast: this.isLast()
+				};
+				return pagination;
+			})
+		);
+	}
+
+	protected setPagination(pagination: Partial<PaginationResponse<T>>) {
+		this.pagination = {
+			...this.pagination,
+			...pagination
+		};
 	}
 
 	protected updatePage(data: T[]) {
@@ -196,13 +192,8 @@ export class Paginator<T = any> {
 		);
 	}
 
-	protected filterPage(data: T[]) {
-		const currentPage = this.pages.get(this.currentPage);
-		return data.filter(item => currentPage.includes(item[this.getIdKey()]));
-	}
-
 	protected isCurrentPageInCache() {
-		return this.pages.has(this.currentPage);
+		return this.hasPageInCache(this.currentPage);
 	}
 
 	protected onPaginationResponse(data: PaginationResponse<T>) {
@@ -211,19 +202,8 @@ export class Paginator<T = any> {
 		this.initTTL(data);
 	}
 
-	protected getCurrentPageFromCache(): Observable<PaginationResponse<T>> {
-		return this.config.dataSource.getData().pipe(
-			take(1),
-			map(data => ({
-				...this.pagination,
-				data: this.filterPage(data)
-			})),
-			tap(({ data }) => this.setPagination({ data }))
-		);
-	}
-
 	protected initTTL(data: PaginationResponse<T>) {
-		interval(this.config.cacheTTL)
+		timer(this.config.cacheTTL)
 			.pipe(take(1))
 			.subscribe(() => this.removePage(data.currentPage));
 	}
@@ -232,12 +212,27 @@ export class Paginator<T = any> {
 		return this.config.dataSource.getIdKey();
 	}
 
-	protected clearCache() {
-		this.pages.clear();
-		this.config.dataSource.destroy();
+	protected destroyDataSource() {
+		this.config.dataSource.destroy && this.config.dataSource.destroy();
 	}
 
-	protected removePage(currentPage: number) {
-		this.pages.delete(currentPage);
+	private initPagination() {
+		this.pagination = {
+			currentPage: 0,
+			data: [],
+			pageSize: this.config.pageSize,
+			totalPages: 0,
+			totalRecords: 0,
+			searchTerm: ''
+		};
+
+		this.pageChanges = new BehaviorSubject<PagingChanges>({
+			currentPage: 0,
+			searchTerm: ''
+		});
+	}
+
+	protected getPageData(data: HashMap<T>, page: number) {
+		return this.pages.get(page).map(id => data[id]);
 	}
 }

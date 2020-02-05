@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { PaginationResponse } from '../../pagination/models/pagination';
 import { PagingRequest } from '../../pagination/models/paging';
-import { pagingToPaginationResponse } from '../../pagination/pagination.helpers';
+import { toPaginationResponse } from '../../pagination/pagination.helpers';
 import { DummyServer } from '../../server/dummy-server';
 import { USERS_MOCK } from '../../server/user-data';
 import { User } from './user';
@@ -18,7 +18,7 @@ export class UserServiceStub {
 
 	getPage(request: PagingRequest): Observable<PaginationResponse<User>> {
 		return this.server.getData(request).pipe(
-			pagingToPaginationResponse(request),
+			toPaginationResponse(request),
 			tap(data => this.ds.setData(data))
 		);
 	}

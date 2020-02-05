@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { QueryEntity } from '@datorama/akita';
-import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { PaginationDataSource } from '../../pagination/models/data-source';
 import { User } from '../user-stub-store/user';
@@ -16,15 +15,25 @@ export class UsersQuery extends QueryEntity<UsersState> implements PaginationDat
 		return this.selectAll().pipe(map(users => users.map(user => ({ ...user, VM: true }))));
 	}
 
-	getData(): Observable<User[]> {
-		return this.selectUserVMs();
+	selectData(asMap: true);
+	selectData(asMap: boolean) {
+		return asMap
+			? this.selectAll({ asObject: true }).pipe(
+					map(map => {
+						return Object.keys(map).reduce((acc, key) => {
+							acc[key] = { ...map[key], VM: true };
+							return acc;
+						}, {});
+					})
+			  )
+			: this.selectUserVMs();
 	}
 
 	getIdKey(): string | number {
 		return this.store.idKey;
 	}
 
-	destroy(): void {
+	remove() {
 		this.store.remove();
 	}
 }

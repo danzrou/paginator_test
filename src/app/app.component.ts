@@ -1,6 +1,4 @@
-import { Component, Inject } from '@angular/core';
-import { switchMap } from 'rxjs/operators';
-import { Paginator } from './pagination/paginator';
+import { Component } from '@angular/core';
 import { PaginatorConfig } from './pagination/paginator.config';
 import { UsersQuery } from './stores/akita-store/users.query';
 import { UsersService } from './stores/akita-store/users.service';
@@ -10,55 +8,28 @@ import { UserServiceStub } from './stores/user-stub-store/users-service';
 @Component({
 	selector: 'app-root',
 	templateUrl: './app.component.html',
-	styleUrls: ['./app.component.scss'],
-	providers: [Paginator]
+	styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-	petsConfig: Partial<PaginatorConfig>;
+	petsConfig: PaginatorConfig;
+	usersConfig: PaginatorConfig;
 
 	constructor(
-		private paginator: Paginator,
 		private userServiceStub: UserServiceStub,
 		private usersService: UsersService,
 		private usersQuery: UsersQuery,
 		private petsService: PetServiceStub
 	) {
 		this.petsConfig = {
-			dataSource: this.petsService.getDataSource(),
-			getPageRequest: this.petsService.getPets.bind(this.petsService)
+			dataSource: this.petsService.getDataSource()
 		};
 
-		this.manualRequests();
+		this.usersConfig = {
+			dataSource: this.usersQuery
+		};
 	}
 
-	manualRequests() {
-		this.paginator.setConfig({ makeRequests: false, dataSource: this.userServiceStub.getDataSource() });
-		this.paginator.pageChanges
-			.pipe(
-				switchMap(page =>
-					this.paginator.getPage(
-						this.userServiceStub.getPage({
-							pageSize: 10,
-							requestedPage: page,
-							searchTerm: ''
-						})
-					)
-				)
-			)
-			.subscribe();
-	}
-
-	private setStubSource() {
-		this.paginator.setConfig({
-			getPageRequest: this.userServiceStub.getPage.bind(this.userServiceStub),
-			dataSource: this.userServiceStub.getDataSource()
-		});
-	}
-
-	private setAkitaSource() {
-		this.paginator.setConfig({
-			dataSource: this.usersQuery,
-			getPageRequest: this.usersService.getPage.bind(this.usersService)
-		});
+	updateUser() {
+		this.usersService.update(1, { firstName: 'Dan'});
 	}
 }

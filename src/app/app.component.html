@@ -1,5 +1,6 @@
 <h3>Users</h3>
-<app-paginated-table></app-paginated-table>
+<button (click)="updateUser()">Update user</button>
+<app-paginated-table [config]="usersConfig" [service]="usersService"></app-paginated-table>
 <hr>
 <h3>Pets</h3>
-<app-paginated-table [config]="petsConfig"></app-paginated-table>
+<app-paginated-table [config]="petsConfig" [service]="petsService"></app-paginated-table>

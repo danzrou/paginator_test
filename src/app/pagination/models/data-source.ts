@@ -1,11 +1,13 @@
-import { EntityState, EntityStore, getEntityType, QueryEntity } from '@datorama/akita';
+import { EntityState, EntityStore, getEntityType, HashMap, QueryEntity } from '@datorama/akita';
 import { Observable } from 'rxjs';
 import { PaginationResponse } from './pagination';
 
 export interface PaginationDataSource<T = any> {
-	getData(): Observable<T[]>;
+	selectData(asMap: true): Observable<HashMap<T>>;
+	selectData(asMap?: boolean): Observable<T[] | HashMap<T>>;
 	getIdKey(): string | number;
-	destroy(): void;
+	remove(): void;
+	destroy?(): void;
 }
 
 export class TempDataSource<S extends EntityState, T = getEntityType<S>>
@@ -18,8 +20,13 @@ export class TempDataSource<S extends EntityState, T = getEntityType<S>>
 		this.query = new QueryEntity<S>(this.store);
 	}
 
-	getData(): Observable<T[]> {
-		return this.query.selectAll();
+	remove() {
+		this.store.remove();
+	}
+
+	selectData(asMap: true): Observable<HashMap<T>>;
+	selectData(asMap: boolean = false): Observable<T[] | HashMap<T>> {
+		return asMap ? this.query.selectAll({ asObject: true }) : this.query.selectAll();
 	}
 
 	getIdKey() {
@@ -28,10 +35,11 @@ export class TempDataSource<S extends EntityState, T = getEntityType<S>>
 
 	destroy(): void {
 		this.store.destroy();
+		this.store = null;
 		this.query = null;
 	}
 
 	setData(data: PaginationResponse<T>) {
-		this.store.add(data.data as any);
+		this.store.add(data.data as getEntityType<S>[]);
 	}
 }

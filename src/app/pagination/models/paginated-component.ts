@@ -7,12 +7,16 @@ import { PaginationResponse } from './pagination';
 export abstract class PaginatedComponent<T = any> implements OnInit, OnDestroy {
 	@Input() config: Partial<PaginatorConfig>;
 
-	pagination$: Observable<PaginationResponse<T>>;
 	isLoading$: Observable<boolean>;
 	dataSource$: Observable<T[]>;
+	pagination$: Observable<PaginationResponse<T>>;
 
-	protected constructor(protected paginator: Paginator<T>) {
+	constructor(protected paginator?: Paginator<T>) {
 		this.initializeSelectors();
+	}
+
+	get pagination() {
+		return this.paginator.pagination;
 	}
 
 	ngOnInit() {
@@ -51,9 +55,14 @@ export abstract class PaginatedComponent<T = any> implements OnInit, OnDestroy {
 		this.paginator.lastPage();
 	}
 
+	getPaginator() {
+		return this.paginator;
+	}
+
 	protected initializeSelectors() {
-		this.pagination$ = this.paginator.pagination$;
-		this.isLoading$ = this.paginator.isLoading$;
-		this.dataSource$ = this.paginator.dataSource$;
+		if (this.paginator) {
+			this.isLoading$ = this.paginator.isLoading$;
+			this.dataSource$ = this.paginator.dataSource.selectData(false) as Observable<T[]>;
+		}
 	}
 }
