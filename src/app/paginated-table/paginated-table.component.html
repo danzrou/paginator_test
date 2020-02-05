@@ -36,11 +36,9 @@
 
     <hr>
 
-    <div *ngIf="isLoading$ | async; else data">Loading...</div>
-    <ng-template #data>
-        <div style="display: flex; justify-content: space-evenly">
-            <app-user-table [data]="pagination.data" title="Page data"></app-user-table>
-            <app-user-table [data]="dataSource$ | async" title="All data"></app-user-table>
-        </div>
-    </ng-template>
+    <div *ngIf="isLoading$ | async">Loading...</div>
+    <div style="display: flex; justify-content: space-evenly">
+        <app-user-table [data]="pagination.data" title="Page data"></app-user-table>
+        <app-user-table [data]="dataSource$ | async" title="All data"></app-user-table>
+    </div>
 </ng-container>
